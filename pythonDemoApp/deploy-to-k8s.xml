@@ -1,0 +1,62 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>cat &lt;&lt;EOT &gt;demoapp.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-demo-app
+  labels:
+    app: python-demo-app
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30000
+      protocol: TCP
+  selector:
+    app: python-demo-app
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: python-demo-app
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: python-demo-app
+    spec:
+      containers:
+      - name: python-demo-app
+        image: gcprishipractice01/publicrepo:v0.0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+      - name: regcred
+EOT
+
+sudo kubectl delete -f demoapp.yaml
+sudo kubectl  create -f  demoapp.yaml
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

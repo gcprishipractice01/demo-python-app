@@ -1,0 +1,45 @@
+cat <<EOT >demoapp.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-demo-app
+  labels:
+    app: python-demo-app
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30000
+      protocol: TCP
+  selector:
+    app: python-demo-app
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: python-demo-app
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: python-demo-app
+    spec:
+      containers:
+      - name: python-demo-app
+        image: gcprishipractice01/publicrepo:v0.0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+      - name: regcred
+EOT
+
+CURR_DIR=$(pwd)
+sudo su <<EOF
+cd $CURR_DIR
+kubectl delete -f demoapp.yaml
+kubectl  create -f  demoapp.yaml
+EOF
